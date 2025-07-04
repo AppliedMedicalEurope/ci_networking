@@ -26,13 +26,12 @@ app.get('/files/:filename', (req, res) => {
     return res.status(404).send('File not found');
   }
 
-  const contentType = mime.lookup(filePath) || 'application/octet-stream'; // ✅ use .lookup()
-
   res.sendFile(filePath, {
-    headers: {
-      'Content-Type': contentType
-    }
-  });
+  headers: {
+    'Content-Type': 'text/html'
+  }
+});
+
 });
 
 app.get('/', (req, res) => {
