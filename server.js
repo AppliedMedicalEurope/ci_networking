@@ -36,3 +36,17 @@ app.get('/files/:filename', (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`Listening on http://localhost:${PORT}`));
+
+app.get('/', (req, res) => {
+  const files = fs.readdirSync(uploadDir);
+  const listItems = files.map(file => `<li><a href="/files/${file}" target="_blank">${file}</a></li>`).join('');
+  res.send(`
+    <h2>Simple File Uploader</h2>
+    <form method="POST" action="/upload" enctype="multipart/form-data">
+      <input type="file" name="file" required />
+      <button type="submit">Upload</button>
+    </form>
+    <h3>Uploaded Files</h3>
+    <ul>${listItems}</ul>
+  `);
+});
