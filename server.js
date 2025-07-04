@@ -26,11 +26,15 @@ app.get('/files/:filename', (req, res) => {
     return res.status(404).send('File not found');
   }
 
-  res.sendFile(filePath, {
-  headers: {
-    'Content-Type': 'text/html'
+ fs.readFile(filePath, 'utf8', (err, data) => {
+  if (err) {
+    console.error(err);
+    return res.status(500).send('Error reading file');
   }
+  res.setHeader('Content-Type', 'text/html');
+  res.send(data);
 });
+
 
 });
 
