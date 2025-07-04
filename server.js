@@ -51,7 +51,7 @@ app.get('/files/:filename', (req, res) => {
 
 // Homepage with upload form and file list
 app.get('/', (req, res) => {
-  const files = fs.readdirSync(uploadDir);
+  const files = fs.readdirSync(uploadDir).filter(file => file !== '.gitkeep');
   const listItems = files.map(file => `<li><a href="/render/${file}" target="_blank">${file}</a></li>`).join('');
   res.send(`
     <h2>CI Form Suggestions</h2>
