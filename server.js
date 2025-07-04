@@ -9,42 +9,58 @@ const PORT = process.env.PORT || 3000;
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
-// Save files using original filename
+// Multer config to preserve original filename
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => cb(null, file.originalname)
 });
 const upload = multer({ storage });
 
-// Upload route
+// Upload endpoint
 app.post('/upload', upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).send('No file uploaded');
-  res.send(`File uploaded: <a href="/files/${req.file.originalname}" target="_blank">Open HTML</a>`);
+  res.send(`
+    File uploaded:<br>
+    - <a href="/render/${req.file.originalname}" target="_blank">View as Webpage</a><br>
+    - <a href="/files/${req.file.originalname}" target="_blank">Raw File Link</a>
+  `);
 });
 
-// Serve uploaded HTML file with hardcoded Content-Type
-app.get('/files/:filename', (req, res) => {
+// Render HTML in-browser via /render
+app.get('/render/:filename', (req, res) => {
   const filePath = path.join(uploadDir, req.params.filename);
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).send('File not found');
-  }
+  if (!fs.existsSync(filePath)) return res.status(404).send('File not found');
 
   fs.readFile(filePath, 'utf8', (err, data) => {
     if (err) {
-      console.error('File read error:', err);
-      return res.status(500).send('Error reading file');
+      console.error('Error reading file:', err);
+      return res.status(500).send('Server error');
     }
-    res.setHeader('Content-Type', 'text/html');
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Content-Disposition', 'inline');
     res.send(data);
   });
 });
 
-// Home page: upload form + list of files
+// Raw file access (optional)
+app.get('/files/:filename', (req, res) => {
+  const filePath = path.join(uploadDir, req.params.filename);
+  if (!fs.existsSync(filePath)) return res.status(404).send('File not found');
+  res.download(filePath); // fallback download behavior
+});
+
+// Homepage with upload form and file list
 app.get('/', (req, res) => {
   const files = fs.readdirSync(uploadDir);
-  const listItems = files.map(file => `<li><a href="/files/${file}" target="_blank">${file}</a></li>`).join('');
+  const listItems = files.map(file => `
+    <li>
+      <strong>${file}</strong> –
+      <a href="/render/${file}" target="_blank">View</a> |
+      <a href="/files/${file}" target="_blank">Download</a>
+    </li>
+  `).join('');
   res.send(`
-    <h2>Simple HTML File Uploader</h2>
+    <h2>HTML File Uploader</h2>
     <form method="POST" action="/upload" enctype="multipart/form-data">
       <input type="file" name="file" accept=".html" required />
       <button type="submit">Upload</button>
