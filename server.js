@@ -1,6 +1,6 @@
 const express = require('express');
 const multer = require('multer');
-const mime = require('mime-types');
+const mime = require('mime-types'); // ✅ use mime-types
 const fs = require('fs');
 const path = require('path');
 const app = express();
@@ -25,21 +25,15 @@ app.get('/files/:filename', (req, res) => {
   if (!fs.existsSync(filePath)) {
     return res.status(404).send('File not found');
   }
-  try {
-    const contentType = mime.getType(filePath) || 'application/octet-stream';
-    res.sendFile(filePath, {
-  headers: {
-    'Content-Type': contentType
-  }
-});
 
-  } catch (err) {
-    console.error('Error serving file:', err);
-    res.status(500).send('Internal Server Error');
-  }
-});
+  const contentType = mime.lookup(filePath) || 'application/octet-stream'; // ✅ use .lookup()
 
-app.listen(PORT, () => console.log(`Listening on http://localhost:${PORT}`));
+  res.sendFile(filePath, {
+    headers: {
+      'Content-Type': contentType
+    }
+  });
+});
 
 app.get('/', (req, res) => {
   const files = fs.readdirSync(uploadDir);
@@ -54,3 +48,5 @@ app.get('/', (req, res) => {
     <ul>${listItems}</ul>
   `);
 });
+
+app.listen(PORT, () => console.log(`Listening on http://localhost:${PORT}`));
