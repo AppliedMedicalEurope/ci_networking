@@ -18,7 +18,17 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 
-app.use('/files', express.static(uploadDir));
+const mime = require('mime');
+app.get('/files/:filename', (req, res) => {
+  const filePath = path.join(uploadDir, req.params.filename);
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).send('File not found');
+  }
+  const contentType = mime.getType(filePath) || 'application/octet-stream';
+  res.setHeader('Content-Type', contentType);
+  res.sendFile(filePath);
+});
+
 
 app.post('/upload', upload.single('file'), (req, res) => {
   res.send(`Uploaded! <a href="/files/${req.file.filename}">Download</a>`);
