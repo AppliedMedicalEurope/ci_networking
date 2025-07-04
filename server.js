@@ -27,8 +27,12 @@ app.get('/files/:filename', (req, res) => {
   }
   try {
     const contentType = mime.getType(filePath) || 'application/octet-stream';
-    res.setHeader('Content-Type', contentType);
-    res.sendFile(filePath);
+    res.sendFile(filePath, {
+  headers: {
+    'Content-Type': contentType
+  }
+});
+
   } catch (err) {
     console.error('Error serving file:', err);
     res.status(500).send('Internal Server Error');
