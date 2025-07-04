@@ -54,7 +54,7 @@ app.get('/', (req, res) => {
   const files = fs.readdirSync(uploadDir);
   const listItems = files.map(file => `<li><a href="/render/${file}" target="_blank">${file}</a></li>`).join('');
   res.send(`
-    <h2>Uploaded Files</h2>
+    <h2>CI Form Suggestions</h2>
     <ul>${listItems}</ul>
   `);
 });
