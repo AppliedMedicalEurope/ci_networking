@@ -52,13 +52,10 @@ app.get('/files/:filename', (req, res) => {
 // Homepage with upload form and file list
 app.get('/', (req, res) => {
   const files = fs.readdirSync(uploadDir);
-  const listItems = files.map(file => `
-    <li>
-      <strong>${file}</strong> –
-      <a href="/render/${file}" target="_blank">View</a> |
-      <a href="/files/${file}" target="_blank">Download</a>
-    </li>
-  `).join('');
+ const listItems = files.map(file => `
+  <li><a href="/render/${file}" target="_blank">${file}</a></li>
+`).join('');
+
   res.send(`
     <h2>HTML File Uploader</h2>
     <form method="POST" action="/upload" enctype="multipart/form-data">
